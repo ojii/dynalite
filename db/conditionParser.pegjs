@@ -259,13 +259,6 @@
     function Call(a, b) {
       // Validate Args
       if (a.toUpperCase() === 'BETWEEN') checkBetweenArgs(b[0], b[1])
-      // TODO: Currently the Group case isn't spreading
-		  if (Array.isArray(b[1])) {
-      	return { 
-          type: a.toLowerCase(),
-        	args: [b[0], ...b[1] ]
-      	}
-      }
     	return {
         type: a.toLowerCase(),
         args: b
@@ -339,19 +332,20 @@ Expression
 
 Token
   = Function
-  / Path
-  / Identity
+  / Group
   / Braced
 
 Identity
-  = Group 
-  / a:$[A-Za-z_0-9:#]+ _ {
+  = a:$[A-Za-z_0-9:#]+ _ {
   	return ResolveAttributes(a)
   }
 
 Group
- = '(' a:Identity b:(',' _ @Identity)+ ')' _ {
+ = '(' a:Path b:(',' _ @Path)+ ')' _ {
  	return [a, ...b]
+ }
+ / a:Path {
+ 	return [a]
  }
 
 Function

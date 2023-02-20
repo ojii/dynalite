@@ -241,7 +241,10 @@ function peg$parse(input, options) {
   var peg$f4 = function(a, b) {
  	return [a, ...b]
  };
-  var peg$f5 = function(name, args) {
+  var peg$f5 = function(a) {
+ 	return [a]
+ };
+  var peg$f6 = function(name, args) {
 
     const attrType = checkFunction(name, args)
 
@@ -252,16 +255,16 @@ function peg$parse(input, options) {
         attrType
     }
    };
-  var peg$f6 = function(a, b) {
+  var peg$f7 = function(a, b) {
  	return [a, ...b]
  };
-  var peg$f7 = function(a) {
+  var peg$f8 = function(a) {
  	return [a]
  };
-  var peg$f8 = function(a, b) {
+  var peg$f9 = function(a, b) {
  	return [a, ...b]
  };
-  var peg$f9 = function(expr) {
+  var peg$f10 = function(expr) {
     redundantParensError()
     return expr
   };
@@ -524,12 +527,9 @@ function peg$parse(input, options) {
 
     s0 = peg$parseFunction();
     if (s0 === peg$FAILED) {
-      s0 = peg$parsePath();
+      s0 = peg$parseGroup();
       if (s0 === peg$FAILED) {
-        s0 = peg$parseIdentity();
-        if (s0 === peg$FAILED) {
-          s0 = peg$parseBraced();
-        }
+        s0 = peg$parseBraced();
       }
     }
 
@@ -539,45 +539,42 @@ function peg$parse(input, options) {
   function peg$parseIdentity() {
     var s0, s1, s2, s3;
 
-    s0 = peg$parseGroup();
-    if (s0 === peg$FAILED) {
-      s0 = peg$currPos;
-      s1 = peg$currPos;
-      s2 = [];
-      if (peg$r0.test(input.charAt(peg$currPos))) {
-        s3 = input.charAt(peg$currPos);
-        peg$currPos++;
-      } else {
-        s3 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$e1); }
-      }
-      if (s3 !== peg$FAILED) {
-        while (s3 !== peg$FAILED) {
-          s2.push(s3);
-          if (peg$r0.test(input.charAt(peg$currPos))) {
-            s3 = input.charAt(peg$currPos);
-            peg$currPos++;
-          } else {
-            s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$e1); }
-          }
+    s0 = peg$currPos;
+    s1 = peg$currPos;
+    s2 = [];
+    if (peg$r0.test(input.charAt(peg$currPos))) {
+      s3 = input.charAt(peg$currPos);
+      peg$currPos++;
+    } else {
+      s3 = peg$FAILED;
+      if (peg$silentFails === 0) { peg$fail(peg$e1); }
+    }
+    if (s3 !== peg$FAILED) {
+      while (s3 !== peg$FAILED) {
+        s2.push(s3);
+        if (peg$r0.test(input.charAt(peg$currPos))) {
+          s3 = input.charAt(peg$currPos);
+          peg$currPos++;
+        } else {
+          s3 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$e1); }
         }
-      } else {
-        s2 = peg$FAILED;
       }
-      if (s2 !== peg$FAILED) {
-        s1 = input.substring(s1, peg$currPos);
-      } else {
-        s1 = s2;
-      }
-      if (s1 !== peg$FAILED) {
-        s2 = peg$parse_();
-        peg$savedPos = s0;
-        s0 = peg$f3(s1);
-      } else {
-        peg$currPos = s0;
-        s0 = peg$FAILED;
-      }
+    } else {
+      s2 = peg$FAILED;
+    }
+    if (s2 !== peg$FAILED) {
+      s1 = input.substring(s1, peg$currPos);
+    } else {
+      s1 = s2;
+    }
+    if (s1 !== peg$FAILED) {
+      s2 = peg$parse_();
+      peg$savedPos = s0;
+      s0 = peg$f3(s1);
+    } else {
+      peg$currPos = s0;
+      s0 = peg$FAILED;
     }
 
     return s0;
@@ -595,7 +592,7 @@ function peg$parse(input, options) {
       if (peg$silentFails === 0) { peg$fail(peg$e2); }
     }
     if (s1 !== peg$FAILED) {
-      s2 = peg$parseIdentity();
+      s2 = peg$parsePath();
       if (s2 !== peg$FAILED) {
         s3 = [];
         s4 = peg$currPos;
@@ -608,7 +605,7 @@ function peg$parse(input, options) {
         }
         if (s5 !== peg$FAILED) {
           s6 = peg$parse_();
-          s7 = peg$parseIdentity();
+          s7 = peg$parsePath();
           if (s7 !== peg$FAILED) {
             s4 = s7;
           } else {
@@ -632,7 +629,7 @@ function peg$parse(input, options) {
             }
             if (s5 !== peg$FAILED) {
               s6 = peg$parse_();
-              s7 = peg$parseIdentity();
+              s7 = peg$parsePath();
               if (s7 !== peg$FAILED) {
                 s4 = s7;
               } else {
@@ -675,6 +672,15 @@ function peg$parse(input, options) {
       peg$currPos = s0;
       s0 = peg$FAILED;
     }
+    if (s0 === peg$FAILED) {
+      s0 = peg$currPos;
+      s1 = peg$parsePath();
+      if (s1 !== peg$FAILED) {
+        peg$savedPos = s0;
+        s1 = peg$f5(s1);
+      }
+      s0 = s1;
+    }
 
     return s0;
   }
@@ -706,7 +712,7 @@ function peg$parse(input, options) {
           if (s5 !== peg$FAILED) {
             s6 = peg$parse_();
             peg$savedPos = s0;
-            s0 = peg$f5(s1, s4);
+            s0 = peg$f6(s1, s4);
           } else {
             peg$currPos = s0;
             s0 = peg$FAILED;
@@ -852,7 +858,7 @@ function peg$parse(input, options) {
       }
       if (s2 !== peg$FAILED) {
         peg$savedPos = s0;
-        s0 = peg$f6(s1, s2);
+        s0 = peg$f7(s1, s2);
       } else {
         peg$currPos = s0;
         s0 = peg$FAILED;
@@ -866,7 +872,7 @@ function peg$parse(input, options) {
       s1 = peg$parsePath();
       if (s1 !== peg$FAILED) {
         peg$savedPos = s0;
-        s1 = peg$f7(s1);
+        s1 = peg$f8(s1);
       }
       s0 = s1;
     }
@@ -940,7 +946,7 @@ function peg$parse(input, options) {
       }
       if (s3 !== peg$FAILED) {
         peg$savedPos = s0;
-        s0 = peg$f8(s1, s3);
+        s0 = peg$f9(s1, s3);
       } else {
         peg$currPos = s0;
         s0 = peg$FAILED;
@@ -999,7 +1005,7 @@ function peg$parse(input, options) {
             if (s8 !== peg$FAILED) {
               s9 = peg$parse_();
               peg$savedPos = s0;
-              s0 = peg$f9(s5);
+              s0 = peg$f10(s5);
             } else {
               peg$currPos = s0;
               s0 = peg$FAILED;
@@ -1445,13 +1451,6 @@ function peg$parse(input, options) {
     function Call(a, b) {
       // Validate Args
       if (a.toUpperCase() === 'BETWEEN') checkBetweenArgs(b[0], b[1])
-      // TODO: Currently the Group case isn't spreading
-		  if (Array.isArray(b[1])) {
-      	return { 
-          type: a.toLowerCase(),
-        	args: [b[0], ...b[1] ]
-      	}
-      }
     	return {
         type: a.toLowerCase(),
         args: b
