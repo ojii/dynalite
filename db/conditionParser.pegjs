@@ -300,7 +300,7 @@
          const [v1, o2] = stack[j];
          
          const pd = symbols[o2.toUpperCase()].prec - symbols[o1.toUpperCase()].prec;
-         if (pd > 0 || pd === 0 && symbols[o1].assoc === 'L') {
+         if (pd > 0 || pd === 0) {
          	stack.pop()
             top = Call(Identifier(o2), [v1, top]);
          } else {
