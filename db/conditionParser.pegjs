@@ -243,6 +243,12 @@
 		},
         '<>': {
         	prec: 2
+        },
+                '<=': {
+        	prec: 2
+        },
+                '>=': {
+        	prec: 2
         }
     };
 
@@ -253,15 +259,17 @@
     function Call(a, b) {
       // Validate Args
       if (a.toUpperCase() === 'BETWEEN') checkBetweenArgs(b[0], b[1])
-      if (a.toUpperCase() === 'IN' && Array.isArray(b[1])) return {
-      	// TODO: Currently the Group case isn't spreading
-      	type: 'in',
-        args: [b[0], ...b[1]]
+      // TODO: Currently the Group case isn't spreading
+		  if (Array.isArray(b[1])) {
+      	return { 
+          type: a.toLowerCase(),
+        	args: [b[0], ...b[1] ]
+      	}
       }
     	return {
-            	type: a.toLowerCase(),
-                args: b
-        }
+        type: a.toLowerCase(),
+        args: b
+      }
     }
 
 	function ResolveAttributes(a) {
@@ -312,10 +320,8 @@
     }
 }
 
-Start = a:NotExpression {
-  return {
-    'expression':a
-  }
+Start = expr:NotExpression {
+      return checkErrors() || {expression: expr, nestedPaths: nestedPaths, pathHeads: pathHeads}
 }
 
 NotExpression
@@ -334,17 +340,13 @@ Expression
 Token
   = Function
   / Path
+  / Identity
   / Braced
 
 Identity
   = Group 
-  / a:$[A-Za-z_0-9:]+ _ {
+  / a:$[A-Za-z_0-9:#]+ _ {
   	return ResolveAttributes(a)
-  }
-
-PathIdentity
-  = a:('#'@$[A-Za-z_0-9]+) {
-  	return ResolveAttributes('#'+a) 
   }
 
 Group
@@ -354,9 +356,8 @@ Group
 
 Function
   = name:FunctionNames "(" _ args:Args ")" _ {
-  
-    checkFunction(name, args)
-    const attrType = getType(args)
+
+    const attrType = checkFunction(name, args)
 
     return {
     	type: 'function',
@@ -367,12 +368,12 @@ Function
    }
   
 FunctionNames
-  = @( 'attribute_exists' 
-  / 'attribute_not_exists'
-  / 'attribute_type'
-  / 'begins_with'
-  / 'contains'
-  / 'size' ) _
+  = @( 'attribute_exists'i
+  / 'attribute_not_exists'i
+  / 'attribute_type'i
+  / 'begins_with'i
+  / 'contains'i
+  / 'size'i ) _
 
 Args
  = a:Path b:(','_ @Path )+ {
@@ -383,13 +384,10 @@ Args
  }
 
 Path
- = a:(@PathIdentity) _ b:('.' @PathIdentity _)+ {
+ = a:(@Identity) _ b:('.' @Identity _)+ {
  	return [a, ...b]
  }
- / a:(PathIdentity) _{
- 	return [a]
- }
- / a:Identity
+ / Identity
 
 Braced
   = "(" _ "(" _ expr:NotExpression ")" _ ")" _ {
@@ -399,7 +397,7 @@ Braced
   / "(" _ @NotExpression ")" _
 
 Symbol
-  = 'AND'i /  'OR'i  / 'IN'i / 'BETWEEN'i  / '=' / '<>' / '>' / '<'
+  = 'AND'i /  'OR'i  / 'IN'i / 'BETWEEN'i  / '=' / '<>' / '>' / '<' / '>=' / '<='
 
  _ 'whitespace'
  	= [ /n/t/r]*
