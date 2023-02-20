@@ -1406,7 +1406,7 @@ function peg$parse(input, options) {
     
 	// Precedence
 	let symbols = {
-    	'AND': {
+        'AND': {
         	prec: 0
         },
         'OR': {
@@ -1426,14 +1426,14 @@ function peg$parse(input, options) {
         },
         '=': {
         	prec: 2
-		},
+		    },
         '<>': {
         	prec: 2
         },
-                '<=': {
+        '<=': {
         	prec: 2
         },
-                '>=': {
+        '>=': {
         	prec: 2
         }
     };
@@ -1469,7 +1469,7 @@ function peg$parse(input, options) {
       return attrVals[a]
     }
 
-    return 'unresolved' + a
+    return a
     }
     
     function ShuntingYard(a, b) {
@@ -1485,7 +1485,7 @@ function peg$parse(input, options) {
         for (let j=stack.length - 1; j>=0; --j) {
          const [v1, o2] = stack[j];
          
-         const pd= symbols[o2].prec - symbols[o1].prec;
+         const pd = symbols[o2.toUpperCase()].prec - symbols[o1.toUpperCase()].prec;
          if (pd > 0 || pd === 0 && symbols[o1].assoc === 'L') {
          	stack.pop()
             top = Call(Identifier(o2), [v1, top]);
