@@ -258,10 +258,19 @@
     
     function Call(a, b) {
       // Validate Args
-      if (a.toUpperCase() === 'BETWEEN') checkBetweenArgs(b[0], b[1])
-    	return {
+      let args = b
+      
+      if (a.toUpperCase() === 'BETWEEN')
+      	checkBetweenArgs(args[0], args[1])
+        
+       // Hack
+       if (Array.isArray(b[1][0]) && Array.isArray(b[1][1])) {
+       	args = [b[0], ...b[1]]
+       }
+        
+     return {
         type: a.toLowerCase(),
-        args: b
+        args
       }
     }
 
@@ -337,15 +346,18 @@ Token
 
 Identity
   = a:$[A-Za-z_0-9:#]+ _ {
-  	return ResolveAttributes(a)
+  	const resolved = ResolveAttributes(a)
+    // This might be wrong
+  	pathHeads[resolved] = true
+  	return resolved
   }
 
 Group
  = '(' a:Path b:(',' _ @Path)+ ')' _ {
- 	return [a, ...b]
+ 	return [a,...b]
  }
  / a:Path {
- 	return [a]
+ 	return a
  }
 
 Function
@@ -379,9 +391,12 @@ Args
 
 Path
  = a:(@Identity) _ b:('.' @Identity _)+ {
+ 	nestedPaths[a] = true
  	return [a, ...b]
  }
- / Identity
+ / a:Identity {
+ 	return [a]
+ }
 
 Braced
   = "(" _ "(" _ expr:NotExpression ")" _ ")" _ {

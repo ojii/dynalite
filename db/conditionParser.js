@@ -236,13 +236,16 @@ function peg$parse(input, options) {
   	return ShuntingYard(a,b)
   };
   var peg$f3 = function(a) {
-  	return ResolveAttributes(a)
+  	const resolved = ResolveAttributes(a)
+    // This might be wrong
+  	pathHeads[resolved] = true
+  	return resolved
   };
   var peg$f4 = function(a, b) {
- 	return [a, ...b]
+ 	return [a,...b]
  };
   var peg$f5 = function(a) {
- 	return [a]
+ 	return a
  };
   var peg$f6 = function(name, args) {
 
@@ -262,9 +265,13 @@ function peg$parse(input, options) {
  	return [a]
  };
   var peg$f9 = function(a, b) {
+ 	nestedPaths[a] = true
  	return [a, ...b]
  };
-  var peg$f10 = function(expr) {
+  var peg$f10 = function(a) {
+ 	return [a]
+ };
+  var peg$f11 = function(expr) {
     redundantParensError()
     return expr
   };
@@ -956,7 +963,13 @@ function peg$parse(input, options) {
       s0 = peg$FAILED;
     }
     if (s0 === peg$FAILED) {
-      s0 = peg$parseIdentity();
+      s0 = peg$currPos;
+      s1 = peg$parseIdentity();
+      if (s1 !== peg$FAILED) {
+        peg$savedPos = s0;
+        s1 = peg$f10(s1);
+      }
+      s0 = s1;
     }
 
     return s0;
@@ -1005,7 +1018,7 @@ function peg$parse(input, options) {
             if (s8 !== peg$FAILED) {
               s9 = peg$parse_();
               peg$savedPos = s0;
-              s0 = peg$f10(s5);
+              s0 = peg$f11(s5);
             } else {
               peg$currPos = s0;
               s0 = peg$FAILED;
@@ -1450,10 +1463,19 @@ function peg$parse(input, options) {
     
     function Call(a, b) {
       // Validate Args
-      if (a.toUpperCase() === 'BETWEEN') checkBetweenArgs(b[0], b[1])
-    	return {
+      let args = b
+      
+      if (a.toUpperCase() === 'BETWEEN')
+      	checkBetweenArgs(args[0], args[1])
+        
+       // Hack
+       if (Array.isArray(b[1][0]) && Array.isArray(b[1][1])) {
+       	args = [b[0], ...b[1]]
+       }
+        
+     return {
         type: a.toLowerCase(),
-        args: b
+        args
       }
     }
 
