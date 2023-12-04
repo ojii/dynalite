@@ -101,7 +101,7 @@ function sendData (req, res, data, statusCode) {
 
 function httpHandler (store, req, res) {
   var body
-  req.on('error', function (err) { throw err })
+  req.on('error', function (err) { console.error(err) })
   req.on('data', function (data) {
     var newLength = data.length + (body ? body.length : 0)
     if (newLength > MAX_REQUEST_BYTES) {
